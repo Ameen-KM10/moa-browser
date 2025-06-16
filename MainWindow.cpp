@@ -76,7 +76,7 @@ MainWindow::~MainWindow() {}
 
 void MainWindow::addNewTab() {
     QWebEngineView *webView = new QWebEngineView(this);
-    webView->setUrl(QUrl("https://google.com"));
+    webView->setUrl(QUrl("https://start.duckduckgo.com/"));
 
     connect(webView, &QWebEngineView::urlChanged, this, &MainWindow::updateAddressBar);
 
