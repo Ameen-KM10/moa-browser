@@ -1,10 +1,9 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QWebEngineView>
+#include <QTabWidget>
 
-// Forward declarations for UI components
 class QLineEdit;
 class QPushButton;
 
@@ -21,11 +20,18 @@ private slots:
     void onBackButtonClicked();
     void onForwardButtonClicked();
     void onReloadButtonClicked();
+    void addNewTab();
+    void closeTab(int index);
+    void closeCurrentTab() { closeTab(tabWidget->currentIndex()); }
+    void switchTab(int index);
 
 private:
-    QWebEngineView* webView;
-    QLineEdit* addressBar;
-    QPushButton *backButton, *forwardButton, *reloadButton;
+    QTabWidget *tabWidget;
+    QLineEdit *addressBar;
+    QPushButton *backButton;
+    QPushButton *forwardButton;
+    QPushButton *reloadButton;
+    QPushButton *newTabButton;
+    
+    QWebEngineView* currentWebView() const;
 };
-
-#endif // MAINWINDOW_H
