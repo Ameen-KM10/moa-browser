@@ -76,6 +76,7 @@ MainWindow::~MainWindow() {}
 
 void MainWindow::addNewTab() {
     QWebEngineView *webView = new QWebEngineView(this);
+    setupWebPage(webView);
     webView->setUrl(QUrl("https://start.duckduckgo.com/"));
 
     connect(webView, &QWebEngineView::urlChanged, this, &MainWindow::updateAddressBar);
@@ -135,4 +136,37 @@ void MainWindow::onReloadButtonClicked() {
     if (QWebEngineView* view = currentWebView()) {
         view->reload();
     }
+}
+
+WebPage::WebPage(MainWindow *mainWindow) 
+    : QWebEnginePage(mainWindow), m_mainWindow(mainWindow) {
+}
+
+QWebEnginePage* WebPage::createWindow(QWebEnginePage::WebWindowType type) {
+    QWebEngineView *newView = new QWebEngineView();
+    WebPage *newPage = new WebPage(m_mainWindow);
+    newView->setPage(newPage);
+    m_mainWindow->createWindowForTab(newPage);
+    return newPage;
+}
+
+void MainWindow::setupWebPage(QWebEngineView *webView) {
+    WebPage *page = new WebPage(this);
+    webView->setPage(page);
+}
+
+void MainWindow::createWindowForTab(QWebEnginePage *page) {
+    QWebEngineView *newView = new QWebEngineView(this);
+    newView->setPage(page);
+
+    connect(newView, &QWebEngineView::urlChanged, this, &MainWindow::updateAddressBar);
+    connect(page, &QWebEnginePage::windowCloseRequested, [this, newView]() {
+        int index = tabWidget->indexOf(newView);
+        if (index >= 0) {
+            closeTab(index);
+        }
+    });
+
+    int index = tabWidget->addTab(newView, "New Tab");
+    tabWidget->setCurrentIndex(index);
 }
