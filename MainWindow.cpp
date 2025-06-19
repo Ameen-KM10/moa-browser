@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Create new tab button
     newTabButton = new QPushButton("+", this);
-    newTabButton->setFixedSize(24, 24);
+
 
     // Navigation buttons
     backButton = new QPushButton("←", this);
@@ -76,13 +76,22 @@ MainWindow::~MainWindow() {}
 
 void MainWindow::addNewTab() {
     QWebEngineView *webView = new QWebEngineView(this);
-    setupWebPage(webView);
-    webView->setUrl(QUrl("https://start.duckduckgo.com/"));
+    webView->setUrl(QUrl("https://google.com"));
 
+    // Connect URL change signal for this tab
     connect(webView, &QWebEngineView::urlChanged, this, &MainWindow::updateAddressBar);
+    connect(webView, &QWebEngineView::titleChanged, [this, webView](const QString &title) {
+        int index = tabWidget->indexOf(webView);
+        if (index != -1) {
+            tabWidget->setTabText(index, title.isEmpty() ? webView->url().host() : title);
+        }
+    });
 
     int index = tabWidget->addTab(webView, "New Tab");
     tabWidget->setCurrentIndex(index);
+    
+    // Update address bar immediately for the new tab
+    addressBar->setText(webView->url().toString());
 }
 
 void MainWindow::closeTab(int index) {
@@ -95,7 +104,8 @@ void MainWindow::closeTab(int index) {
 
 void MainWindow::switchTab(int index) {
     if (QWebEngineView* view = currentWebView()) {
-        updateAddressBar(view->url());
+        // Update address bar with current tab's URL
+        addressBar->setText(view->url().toString());
     }
 }
 
@@ -114,9 +124,12 @@ void MainWindow::loadPage() {
 }
 
 void MainWindow::updateAddressBar(const QUrl &url) {
+    // Only update if the signal comes from the current tab
     if (sender() == currentWebView()) {
         addressBar->setText(url.toString());
-        tabWidget->setTabText(tabWidget->currentIndex(), url.host());
+        // Update tab title with the page hostname
+        int index = tabWidget->currentIndex();
+        tabWidget->setTabText(index, url.host().isEmpty() ? "New Tab" : url.host());
     }
 }
 
