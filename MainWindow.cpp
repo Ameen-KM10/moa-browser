@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QToolBar* toolBar = new QToolBar("Navigation");
     toolBar->addWidget(toolWidget);
+    toolBar->setMovable(false);
     addToolBar(toolBar);
 
     // Set central widget
