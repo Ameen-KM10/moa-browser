@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     backButton = new QPushButton("←", this);
     forwardButton = new QPushButton("→", this);
     reloadButton = new QPushButton("⟳", this);
+    devToolsButton = new QPushButton("DevTools", this);
 
     // Connect signals
     connect(addressBar, &QLineEdit::returnPressed, this, &MainWindow::loadPage);
@@ -43,6 +44,33 @@ MainWindow::MainWindow(QWidget *parent)
     connect(tabWidget, &QTabWidget::currentChanged, this, &MainWindow::switchTab);
     connect(tabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::closeTab);
     connect(newTabButton, &QPushButton::clicked, this, &MainWindow::addNewTab);
+    connect(devToolsButton, &QPushButton::clicked, this, [this]() {
+        QWebEngineView* view = currentWebView();
+        if (!view) return;
+
+        // Create DevTools view and tab
+        QWebEngineView* devToolsView = new QWebEngineView;
+        int devToolsTabIndex = tabWidget->addTab(devToolsView, "DevTools");
+        tabWidget->setCurrentIndex(devToolsTabIndex);
+
+        // Link DevTools to the current page
+        view->page()->setDevToolsPage(devToolsView->page());
+
+        // Optional: set an icon for the DevTools tab
+        // tabWidget->setTabIcon(devToolsTabIndex, QIcon(":/icons/devtools.svg"));
+    });
+
+    QShortcut* devToolsShortcut = new QShortcut(QKeySequence(Qt::Key_F12), this);
+    connect(devToolsShortcut, &QShortcut::activated, this, [this]() {
+        QWebEngineView* view = currentWebView();
+        if (!view) return;
+
+        QWebEngineView* devToolsView = new QWebEngineView;
+        int devToolsTabIndex = tabWidget->addTab(devToolsView, "DevTools");
+        tabWidget->setCurrentIndex(devToolsTabIndex);
+
+        view->page()->setDevToolsPage(devToolsView->page());
+    });
 
     // // Keyboard shortcuts
     // new QShortcut(QKeySequence(Qt::CTRL + Qt::T), this, SLOT(addNewTab()));
@@ -58,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
     toolLayout->addWidget(reloadButton);
     toolLayout->addWidget(addressBar);
     toolLayout->addWidget(newTabButton);
+    toolLayout->addWidget(devToolsButton);
 
     QToolBar* toolBar = new QToolBar("Navigation");
     toolBar->addWidget(toolWidget);
