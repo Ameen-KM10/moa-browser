@@ -50,7 +50,8 @@ private:
     QPushButton *forwardButton;
     QPushButton *reloadButton;
     QPushButton *newTabButton;
-    
+    QPushButton *devToolsButton;
+
     QWebEngineView* currentWebView() const;
     void setupWebPage(QWebEngineView *webView);     // Add this line
 };
